@@ -153,12 +153,20 @@ class puppetmaster {
       require => File['/etc/puppet/rack/public'],
   }
 
-  file {'/etc/puppet/rack/public':
+  file {'/etc/puppet/rack':
     owner   => puppet,
     group   => puppet,
     mode    => 0644,
     ensure  => directory,
     require => Package['puppet-server'],
+  }
+
+  file {'/etc/puppet/rack/public':
+    owner   => puppet,
+    group   => puppet,
+    mode    => 0644,
+    ensure  => directory,
+    require => File['/etc/puppet/rack'],
   }
 
 
@@ -236,8 +244,6 @@ EOF
 ############
 $PUPPET apply --modulepath=${MODULE_PATH} -e "include puppetmaster" 
 
-/bin/mkdir -p /etc/puppet/rack/public
-/bin/chown -R puppet:puppet /etc/puppet/rack/
 # We need to generate the puppet ssl certs before we can start nginx
 # perhaps there is a better way than doing this
 /sbin/service puppetmaster start
