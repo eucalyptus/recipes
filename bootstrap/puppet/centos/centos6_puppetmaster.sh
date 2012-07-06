@@ -153,6 +153,13 @@ class puppetmaster {
       require => File['/etc/puppet/rack/public'],
   }
 
+  file {'/etc/puppet/rack/config.ru':
+    owner   => puppet,
+    group   => puppet,
+    mode    => 0644,
+    require => Exec['rack-config'],
+  }
+
   file {'/etc/puppet/rack':
     owner   => puppet,
     group   => puppet,
