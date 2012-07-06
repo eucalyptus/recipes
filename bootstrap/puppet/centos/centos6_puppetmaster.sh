@@ -35,6 +35,11 @@
 # or physical system. It uses puppet to bootstrap itself as a server and 
 # is based on the original puppet bootstrap recipe.
 # It uses Nginx as the webserver with passenger to help puppet scale.
+#
+# Credits:
+# Tom Ellis <tom.ellis@eucalyptus.com>
+# Inspired by: 
+# http://z0mbix.github.com/blog/2012/03/01/use-nginx-and-passenger-to-power-your-puppet-master/
 # 
 # Todo:
 # Add tweak to /etc/nginx/conf.d/passenger.conf@
