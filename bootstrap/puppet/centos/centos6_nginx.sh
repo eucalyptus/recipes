@@ -30,10 +30,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-############################################################################
-# nginx on Centos 6 on Eucalyptus                                          #
-#   Tested on: Eucalyptus Partner Cloud, emi-575A398B                      #
-############################################################################
+#####################################################################################
+# nginx on Centos 6 on Eucalyptus                                                   #
+#   Tested on Centos6, Eucalyptus Community Cloud                                   #
+#   euca-run-instances -k yourkey emi-D482103E -t m1.large -f centos6_nginx.sh      #
+#####################################################################################
 
 FULL_HOSTNAME="myhost.mydomain"
 SHORT_HOST=`echo ${FULL_HOSTNAME} | cut -d'.' -f1`
