@@ -1,0 +1,5 @@
+Puppet module for installing euca2ools with Puppet.
+
+Easiest way to run it is by dropping it in /etc/puppet/modules on the node and
+running "puppet apply -e "include euca2ools". These should also be able to be 
+placed on a puppet master and add "include euca2ools" to a node's configuation.
