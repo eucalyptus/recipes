@@ -1,0 +1,4 @@
+[euca2ools]
+name=Euca2ools
+baseurl=http://downloads.eucalyptus.com/software/euca2ools/2.1/rhel/$releasever/$basearch
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-eucalyptus-release
