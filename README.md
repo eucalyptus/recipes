@@ -6,3 +6,6 @@ The purpose of the Eucalyptus Recipes Project is to make it dead-easy to make Eu
 In the bootstrap folder, you will find the basic metadata scripts that serve as the example for all recipes.  Run euca-run-instances with the -f switch, and your recipe will run as soon as the instance starts.
 
 Current bootstraps include setup for puppet and chef clients.  Many more examples will be coming soon!
+
+Current puppet modules:
+* euca2ools
