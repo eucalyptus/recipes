@@ -39,6 +39,8 @@ YUM=`which yum`
 RPM=`which rpm`
 EPEL_PACKAGE="epel-release-5-4.noarch.rpm"
 EPEL_URL="http://dl.fedoraproject.org/pub/epel/5/i386/"
+PUPPET_REPO=1
+PUPPET_GPG_KEY="RPM-GPG-KEY-puppetlabs"
 
 ###########
 # Setup the hostname for the system. Puppet really relies on 
@@ -51,11 +53,32 @@ sed -i -e "s/\(localhost.localdomain\)/${SHORT_HOST} ${FULL_HOSTNAME} \1/" /etc/
 echo -n ${FULL_HOSTNAME} >> /etc/sysconfig/network
 
 ###########
-# Download and install EPEL repo which contains the puppet agent.
+# If $PUPPET_REPO is set to anything other than 0 then we will use those, else use the
+# EPEL repository for Puppet.
 ###########
-curl -o /root/${EPEL_PACKAGE} ${EPEL_URL}/${EPEL_PACKAGE}
+if [ $PUPPET_REPO ]; then
+    cat >>/etc/yum.repos.d/puppet.repo <<EOF
+[puppet]
+name=Puppet $releasever - $basearch - Source
+baseurl=http://yum.puppetlabs.com/el/\$releasever/products/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=http://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs 
 
-${RPM} -Uhv /root/${EPEL_PACKAGE}
+[puppet-dep]
+name=Puppet Dependencies $releasever - $basearch - Source
+baseurl=http://yum.puppetlabs.com/el/\$releasever/dependencies/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=http://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs 
+EOF
+    curl -o /etc/pki/rpm-gpg/${PUPPET_GPG_KEY} http://yum.puppetlabs.com/${PUPPET_GPG_KEY}
+else
+
+    curl -o /root/${EPEL_PACKAGE} ${EPEL_URL}/${EPEL_PACKAGE}
+
+    ${RPM} -Uhv /root/${EPEL_PACKAGE}
+fi
 
 ###########
 # Update the instance and install the puppet agent
