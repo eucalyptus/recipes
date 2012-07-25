@@ -36,6 +36,7 @@ FULL_HOSTNAME="myhost.mydomain"
 SHORT_HOST=`echo ${FULL_HOSTNAME} | cut -d'.' -f1`
 APTITUDE=`which aptitude`
 APT_KEY=`which apt-key`
+USE_PUPPET_REPO=1
 
 ###########
 # Setup the hostname for the system. Puppet really relies on 
@@ -43,7 +44,7 @@ APT_KEY=`which apt-key`
 ###########
 hostname ${FULL_HOSTNAME}
 
-sed -i -e "s/\(localhost.localdomain\)/${SHORT_HOST} ${FULL_HOSTNAME} \1/" /etc/hosts
+sed -i -e "s/\(localhost\)/${SHORT_HOST} ${FULL_HOSTNAME} \1/" /etc/hosts
 
 ###########
 # Need to add in the aptitude workarounds for instances.
@@ -54,6 +55,17 @@ export DEBIAN_FRONTEND=noninteractive
 export DEBIAN_PRIORITY=critical
 
 ${APT_KEY} adv --keyserver keyserver.ubuntu.com --recv-keys BE09C571
+
+##########
+# Puppet APT Repository
+# If $USE_PUPPET_REPO is non-zero then the Puppet APT repository will be used
+# to install the puppet agent. Else the Ubuntu/Debian repo will be used.
+##########
+if [[ ${USE_PUPPET_REPO} ]]; then
+    CODENAME=`lsb_release -c | awk '{print $2}'`
+    echo -e "deb http://apt.puppetlabs.com/ ${CODENAME} main\ndeb-src http://apt.puppetlabs.com/ ${CODENAME} main" >> /etc/apt/sources.list.d/puppet.list
+    apt-key  adv --keyserver keyserver.ubuntu.com --recv 4BD6EC30
+fi
 
 ##########
 # Update the instance and install the puppet agent
