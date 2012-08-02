@@ -42,3 +42,12 @@ sed -i -e "s/\(localhost.localdomain\)/${SHORT_HOST} ${FULL_HOSTNAME} \1/" /etc/
 
 ${YUM} -y update
 
+${YUM} -y install mock
+useradd builder
+usermod -a -G mock builder
+${YUM} -y install git rubygem-rake ntp
+su builder -c "cd /home/builder ; git clone git://github.com/openshift/crankcase.git /home/builder/crankcase"
+su builder -c "cd /home/builder/crankcase"
+cd /home/builder/crankcase/build ; rake build_setup
+cd /home/builder/crankcase/build ; rake build
+cd /home/builder/crankcase/build ; rake install_broker
