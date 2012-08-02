@@ -1,0 +1,29 @@
+EucaBot Recipe
+--------------
+
+This recipe is a very simple recipe to be used with our test images
+(debian-based). One of the important EucaBot feature is to keep track of
+our meeting notes.
+
+The original scripts and noted are at
+https://projects.eucalyptus.com/redmine/issues/32
+
+Details
+-------
+
+TBD
+
+Usage
+-----
+
+Make sure you have a security group which allow for port 22 (SSH) to be
+open: 
+
+	euca-add-group -d "eucabot security group" eucabot
+	euca-authorize -p 22 -P tcp -s 0.0.0.0/0 eucabot
+
+When starting with one of our debian-based images you can do something
+like
+
+	euca-run-instance -g eucabot -k XXXX emi-XXXXXX -f eucabot.sh 
+

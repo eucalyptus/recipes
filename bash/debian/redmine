@@ -1,0 +1,32 @@
+# These modules must be enabled : passenger
+# Configuration for http://localhost/redmine
+<VirtualHost *:80>
+    ServerAdmin projects-administrator@eucalyptus.com
+    ServerName projects.eucalyptus.com
+    RewriteEngine On
+    RewriteRule ^(.*)$ https://projects.eucalyptus.com$1 [R=301,L]
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerAdmin projects-administrator@eucalyptus.com
+    ServerName projects.eucalyptus.com
+    # this is the passenger config
+    RailsEnv production
+    SetEnv X_DEBIAN_SITEID "default"
+    SetEnv RAILS_RELATIVE_URL_ROOT "/redmine"
+    # apache2 serves public files
+    DocumentRoot /usr/share/redmine/public
+    Alias "/redmine/plugin_assets/" /var/cache/redmine/default/plugin_assets/
+    Alias "/redmine" /usr/share/redmine/public
+    RewriteEngine On
+    RewriteRule ^$ /redmine [R=301]
+    SSLEngine on
+    SSLCertificateFile    /etc/ssl/certs/eucalyptus-cert.crt
+    SSLCertificateKeyFile /etc/ssl/private/eucalyptus-nopass.key
+    SSLCertificateChainFile /etc/ssl/certs/gd_bundle.crt
+    <Directory "/usr/share/redmine/public">
+        Order allow,deny
+        Allow from all
+    </Directory>
+</VirtualHost>
+

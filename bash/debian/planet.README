@@ -1,0 +1,44 @@
+Planet Recipe
+--------------
+
+This script is to be sued with our test images (debian based). It will
+install and configure planet (http://intertwingly.net/code/venus/). This
+is the script we use for
+	http://planet.eucalyptus.com
+
+Details
+-------
+
+All the configurations for Planet is stored on a walrus bucket (for our
+planet.eucalyotus.com). To modify planet's configuration, we simply upload
+the file to the Walrus bucket and the cronjob will pick it up. Any s3 tool
+that allows to change the endpoint URL should work. To upload the modified
+config files we do:
+
+        s3curl --id <id> --acl public-read --put <configfile> -- $S3_URL/euca-planet/<configfile>
+
+The modified s3curl can be retrieved with 
+        curl -f -o s3curl --url http://173.205.188.8:8773/services/Walrus/s3curl/s3curl-euca.pl
+
+
+Usage
+-----
+
+Make sure you have a security group that allows for connections to the web
+server. Tipically these are port 80 (http) and 443 (https). We usually add
+port 22 (ssh). For example
+
+	euca-add-group -d "webserver security group" webserver
+	euca-authorize -p 80 -P tcp -s 0.0.0.0/0 webserver
+	euca-authorize -p 443 -P tcp -s 0.0.0.0/0 webserver
+	euca-authorize -p 22 -P tcp -s 0.0.0.0/0 webserver
+
+When starting with one of our debian-based images you can do something
+like
+
+	euca-run-instance -k XXX -g webserver emi-XXXXXX -f planet.sh
+
+Since we have an elastic ip associate with the planet, the last step is to
+associate it to the running instance
+
+	euca-associate-address -i i-XXXXX planet.eucalyptus.com
