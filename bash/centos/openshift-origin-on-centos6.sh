@@ -43,6 +43,7 @@ echo -n ${FULL_HOSTNAME} >> /etc/sysconfig/network
 yum -y update
 
 yum -y install mock
+yum -y install sudo
 useradd builder
 usermod -a -G mock builder
 yum -y install git rubygem-rake ntp
