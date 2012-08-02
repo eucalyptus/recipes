@@ -38,14 +38,14 @@ FULL_HOSTNAME="myhost.mydomain"
 SHORT_HOST=`echo ${FULL_HOSTNAME} | cut -d'.' -f1`
 hostname ${FULL_HOSTNAME}
 sed -i -e "s/\(localhost.localdomain\)/${SHORT_HOST} ${FULL_HOSTNAME} \1/" /etc/hosts
-# echo -n ${FULL_HOSTNAME} >> /etc/sysconfig/network
+echo -n ${FULL_HOSTNAME} >> /etc/sysconfig/network
 
-${YUM} -y update
+yum -y update
 
-${YUM} -y install mock
+yum -y install mock
 useradd builder
 usermod -a -G mock builder
-${YUM} -y install git rubygem-rake ntp
+yum -y install git rubygem-rake ntp
 su builder -c "cd /home/builder ; git clone git://github.com/openshift/crankcase.git /home/builder/crankcase"
 su builder -c "cd /home/builder/crankcase"
 cd /home/builder/crankcase/build ; rake build_setup
