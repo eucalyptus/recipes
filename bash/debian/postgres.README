@@ -1,0 +1,60 @@
+Postgres Recipe
+--------------
+
+This recipe is a very simple recipe to be used with our test images
+(debian-based). It will install postgres, then either use ephemeral
+(WARNING: DATA CAN BE LOST) or an EBS volume to store the database. It
+will load a previous database dump from a walrus bucket and can setup a
+cronjob to save the database to the same walrus bucket.
+
+Right now if very crude but it gets the job done to create our backend for
+projects.eucalyptus.com.
+
+Details
+-------
+
+The scripts may stop and wait for an EBS volume to show up (it expects
+/dev/sdb), otherwise it will use ephemeral for database storage: the user
+will need to configure which one (value of MOUNT_DEV).
+
+The database will be mounted under /postgres and the postgres
+configuration will be changed to allow network access to it. A modified
+s3curl will be download and install to access Walrus buckets: the key and
+id will need to be changes (values of WALRUS_ID and WALRUS_KEY) as well as
+the Walrus IP address (WALRUS_IP).
+
+s3curl will be used to donwload the previous database dump which will be
+in $WALRUS_URL/$WALRUS_MASTER (respectively Walrus URL with bucket and
+file name) and, if enabled (WALRUS_BACKUP="Y"), a cronjob will be setup to
+save the database into the same bucket. A copy of the database will be
+suffixed with the day of the month, thus a month worth of babkups will be
+saved in Walrus.  A copy of the latest database dump will be saved in
+$WALRUS_MASTER to ensure that a restart of the script will alwasy load the
+latest dump.
+
+The walrus bucket needs to already exists. If you use s3curl you can
+create it with
+
+s3curl --id <my_walrus> --put -- $WALRUS_URL
+
+Usage
+-----
+
+Make sure you have a security group which allow for port 5432 to be open
+from the database clients. I usually add also ssh. For example:
+
+	euca-add-group -d "postgres security group" postgres
+	euca-authorize -p 5432 -P tcp -s 0.0.0.0/0 postgres
+	euca-authorize -p 22 -P tcp -s 0.0.0.0/0 postgres
+
+When starting with one of our debian-based images you can do something
+like
+
+	euca-run-instance -g postgres -k XXXX emi-XXXXXX -f postgresql.sh 
+
+then when the instance is up and running if an EBS volume is used
+
+	euca-attach-volume -i i-XXXXXX -d /dev/sdb vol-XXXXXX
+
+After which the database should be running with the latest dump retrieved
+from the Walrus bucket.

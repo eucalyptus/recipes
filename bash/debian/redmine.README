@@ -1,0 +1,71 @@
+Redmine Recipe
+--------------
+
+This recipe is to be used with our test images (debian-based). It will
+install and configure redmine on an instance. The database is assumed to
+be on a different instance, and in our case we use the simple postgres
+script in PostgresRecipe.
+
+Files
+-----
+
+Files used:
+
+database.yml    - database configuration for redmine 
+email.yml       - email configuration for redmine
+redmine         - apache configuration for redmine
+redmine.sh      - the script to configure the instance
+
+Details
+-------
+
+The scripts needs to have s3curl credentials to access private buckets
+where the configuration is stored. The credentials and walrus endpoint are
+defined at the beginning of the script and they will need to be configured
+for your redmine installation.
+
+The script will then acquire s3curl-euca.pl from a known location and use
+it to access the private bucket for the configuration files. 
+
+With the script you will find examples of the configuration files we have
+in walrus to start our instance of redmine. All the values (passwords,
+hosts addresses) will need to be changed.
+
+email.yml: contains the configuration to allow redmine to send emails
+database.yml: contains the configuration to reach the database
+redmine: contains the apache configuration we use
+
+For the email there is an options to install a local SMTP server (exim4
+in this case): the values for the mailname and the email address to
+receive the admin emails will need to be modified.
+
+In database.yml we like to use the private IP address of the database
+instance so we don't need to expose the database externally.
+
+The variable PLUGINS can contains a list of github URL pointing to redmine
+plugins to be installed. WARNING: some plugins will requires a newer
+version of redmine! For example we needed to upgrade to testing to use
+PLUGINS="git://github.com/kulesa/redmine_better_gantt_chart.git"
+
+The scripts can also setup clones of remotes git repos (ie github) to
+allow redmine users to browse and reference code. 
+
+Usage
+-----
+
+Since the instance is configured to run apache2-ssl, port 443 will need
+to be available, and usually port 22 (ssh) will be opened for maintenance
+purposes. To create a new security group and add the right permissions you
+can then:
+
+	euca-add-group -d "redmine security group" redmine
+	euca-authorize -p 443 -P tcp -s 0.0.0.0/0 redmine
+	euca-authorize -p 22 -P tcp -s 0.0.0.0/0 redmine
+
+	
+When starting with one of our debian-based images you can do something
+like
+
+	euca-run-instance -f redmine.sh -g redmine -i mykey.priv emi-XXXXXX
+
+

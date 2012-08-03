@@ -1,0 +1,9 @@
+production:
+  delivery_method: :smtp
+  smtp_settings:
+    address: smtp-remote-server
+    port: 25
+    domain: eucalyptus.com
+    authentication: :none
+#    user_name: redmine
+#    password: ********

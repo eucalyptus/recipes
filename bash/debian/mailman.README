@@ -1,0 +1,26 @@
+Mailman Recipe
+--------------
+
+This recipe is a very simple recipe to be used with our test images
+(debian-based). It is used for our mailman installation of
+lists.eucalyptus.com.
+
+Details
+-------
+
+TBD
+
+Usage
+-----
+
+Make sure you have a security group which allow for port 25 (SMTP) to be
+open from the database clients. I usually add also ssh. For example:
+
+	euca-add-group -d "mailman security group" mailman
+	euca-authorize -p 25 -P tcp -s 0.0.0.0/0 mailman
+	euca-authorize -p 22 -P tcp -s 0.0.0.0/0 mailman
+
+When starting with one of our debian-based images you can do something
+like
+
+	euca-run-instance -g mailman -k XXXX emi-XXXXXX -f mailman.sh 
