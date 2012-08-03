@@ -40,6 +40,10 @@ hostname ${FULL_HOSTNAME}
 sed -i -e "s/\(localhost.localdomain\)/${SHORT_HOST} ${FULL_HOSTNAME} \1/" /etc/hosts
 echo -n ${FULL_HOSTNAME} >> /etc/sysconfig/network
 
+# Write this into a script to be forked separately.  This is to work around
+# the systemd timeout issue.  Future versions of cloud-init should perhaps
+# handle this case.
+cat >> /root/boot-script.bash <<EOF
 yum -y update 1>/tmp/01.out 2>/tmp/01.err
 
 yum -y install mock 1>/tmp/02.out 2>/tmp/02.err
@@ -52,3 +56,6 @@ su builder -c "cd /home/builder/crankcase" 1>/tmp/08.out 2>/tmp/08.err
 cd /home/builder/crankcase/build ; rake build_setup 1>/tmp/09.out 2>/tmp/09.err
 cd /home/builder/crankcase/build ; rake build 1>/tmp/10.out 2>/tmp/10.err
 cd /home/builder/crankcase/build ; rake install_broker 1>/tmp/11.out 2>/tmp/11.err
+EOF
+
+/bin/bash /root/boot-script.bash &
