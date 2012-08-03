@@ -54,8 +54,7 @@ yum -y install git rubygem-rake ntp 1>/tmp/06.out 2>/tmp/06.err
 su builder -c "cd /home/builder ; git clone git://github.com/openshift/crankcase.git /home/builder/crankcase" 1>/tmp/07.out 2>/tmp/07.err
 su builder -c "cd /home/builder/crankcase" 1>/tmp/08.out 2>/tmp/08.err
 cd /home/builder/crankcase/build ; rake build_setup 1>/tmp/09.out 2>/tmp/09.err
-cd /home/builder/crankcase/build ; rake build 1>/tmp/10.out 2>/tmp/10.err
-cd /home/builder/crankcase/build ; rake install_broker 1>/tmp/11.out 2>/tmp/11.err
+cd /home/builder/crankcase/build ; rake devbroker1>/tmp/10.out 2>/tmp/10.err
 EOF
 
 /bin/bash /root/boot-script.bash &
