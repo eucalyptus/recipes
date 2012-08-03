@@ -40,15 +40,15 @@ hostname ${FULL_HOSTNAME}
 sed -i -e "s/\(localhost.localdomain\)/${SHORT_HOST} ${FULL_HOSTNAME} \1/" /etc/hosts
 echo -n ${FULL_HOSTNAME} >> /etc/sysconfig/network
 
-yum -y update
+yum -y update 1>/tmp/01.out 2>/tmp/01.err
 
-yum -y install mock
-yum -y install sudo
-useradd builder
-usermod -a -G mock builder
-yum -y install git rubygem-rake ntp
-su builder -c "cd /home/builder ; git clone git://github.com/openshift/crankcase.git /home/builder/crankcase"
-su builder -c "cd /home/builder/crankcase"
-cd /home/builder/crankcase/build ; rake build_setup
-cd /home/builder/crankcase/build ; rake build
-cd /home/builder/crankcase/build ; rake install_broker
+yum -y install mock 1>/tmp/02.out 2>/tmp/02.err
+yum -y install sudo 1>/tmp/03.out 2>/tmp/03.err
+useradd builder 1>/tmp/04.out 2>/tmp/04.err
+usermod -a -G mock builder 1>/tmp/05.out 2>/tmp/05.err
+yum -y install git rubygem-rake ntp 1>/tmp/06.out 2>/tmp/06.err
+su builder -c "cd /home/builder ; git clone git://github.com/openshift/crankcase.git /home/builder/crankcase" 1>/tmp/07.out 2>/tmp/07.err
+su builder -c "cd /home/builder/crankcase" 1>/tmp/08.out 2>/tmp/08.err
+cd /home/builder/crankcase/build ; rake build_setup 1>/tmp/09.out 2>/tmp/09.err
+cd /home/builder/crankcase/build ; rake build 1>/tmp/10.out 2>/tmp/10.err
+cd /home/builder/crankcase/build ; rake install_broker 1>/tmp/11.out 2>/tmp/11.err
