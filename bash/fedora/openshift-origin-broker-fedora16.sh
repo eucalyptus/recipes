@@ -44,17 +44,37 @@ echo -n ${FULL_HOSTNAME} >> /etc/sysconfig/network
 # the systemd timeout issue.  Future versions of cloud-init should perhaps
 # handle this case.
 cat >> /root/boot-script.bash <<EOF
+# First, update all packages.
 yum -y update 1>/tmp/01.out 2>/tmp/01.err
 
+# Next, install mock and sudo to allow package building.
 yum -y install mock 1>/tmp/02.out 2>/tmp/02.err
 yum -y install sudo 1>/tmp/03.out 2>/tmp/03.err
+
+# Next, create user for building packages and put that 
+# user in the right groups. 
+useradd mock -g mock 1>/tmp/04a.out 2>/tmp/04a.err 
 useradd builder 1>/tmp/04.out 2>/tmp/04.err
 usermod -a -G mock builder 1>/tmp/05.out 2>/tmp/05.err
+
+# A hack to move builder's homedir into the bigger mount directory.
+# mv /home/builder /mnt/home-builder 1>/tmp/04a.out 2>/tmp/04a.err
+# ln -s /mnt/home-builder /home/builder 1>/tmp/04b.out 2>/tmp/04b.err
+
+# Install rake and other goodness.
 yum -y install git rubygem-rake ntp 1>/tmp/06.out 2>/tmp/06.err
+
+# Get the latest crankcase repo.
 su builder -c "cd /home/builder ; git clone git://github.com/openshift/crankcase.git /home/builder/crankcase" 1>/tmp/07.out 2>/tmp/07.err
+
+# A hack to fix an issue in the Rakefile
+perl -pi -e 's/.*getlogin.*//;' /home/builder/crankcase/build/Rakefile
+
+# Start building!
 su builder -c "cd /home/builder/crankcase" 1>/tmp/08.out 2>/tmp/08.err
 cd /home/builder/crankcase/build ; rake build_setup 1>/tmp/09.out 2>/tmp/09.err
-cd /home/builder/crankcase/build ; rake devbroker1>/tmp/10.out 2>/tmp/10.err
+cd /home/builder/crankcase/build ; rake devbroker 1>/tmp/10.out 2>/tmp/10.err
 EOF
 
 /bin/bash /root/boot-script.bash &
+
