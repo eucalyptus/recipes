@@ -47,9 +47,9 @@ bash appscale_build.sh 1>/tmp/05.out 2>/tmp/05.err
 
 # installs the appscale tools on the image
 cd ~
-git clone git://github.com/AppScale/appscale-tools.git trunk-tools
-cd trunk-tools/debian
-bash appscale_build.sh
+git clone git://github.com/AppScale/appscale-tools.git trunk-tools 1>/tmp/06.out 2>/tmp/06.err
+cd trunk-tools/debian 1>/tmp/07.out 2>/tmp/07.err
+bash appscale_build.sh 1>/tmp/08.out 2>/tmp/08.err
 
 EOF
 
