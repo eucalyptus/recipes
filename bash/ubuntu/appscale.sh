@@ -36,24 +36,26 @@
 # Write this into a script to be forked separately.  This is to work around
 # potential systemd timeout issues.
 cat >> /root/boot-script.bash <<EOF
-
 apt-get -y update 1>/tmp/01.out 2>/tmp/01.err
-
 apt-get -y install less bind9utils dnsutils mdadm git-core 1>/tmp/02.out 2>/tmp/02.err
+
+# installs appscale on the image
+cd ~
 git clone git://github.com/AppScale/appscale.git 1>/tmp/03.out 2>/tmp/03.err
+cd appscale/debian 1>/tmp/04.out 2>/tmp/04.err
+bash appscale_build.sh 1>/tmp/05.out 2>/tmp/05.err
+
+# installs the appscale tools on the image
+cd ~
+git clone git://github.com/AppScale/appscale-tools.git trunk-tools
+cd trunk-tools/debian
+bash appscale_build.sh
+
 EOF
 
 /bin/bash /root/boot-script.bash &
 
 
-# installs appscale on the image
-#git clone git://github.com/AppScale/appscale.git
-#cd appscale/debian
-#bash appscale_build.sh
 
-# installs the appscale tools on the image
-#git clone git://github.com/AppScale/appscale-tools.git trunk-tools
-#cd trunk-tools/debian
-#bash appscale_build.sh
 
 
