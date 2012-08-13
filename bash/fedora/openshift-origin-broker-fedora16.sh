@@ -77,4 +77,3 @@ cd /home/builder/crankcase/build ; rake devbroker 1>/tmp/10.out 2>/tmp/10.err
 EOF
 
 /bin/bash /root/boot-script.bash &
-
