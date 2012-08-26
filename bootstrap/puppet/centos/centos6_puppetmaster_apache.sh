@@ -102,6 +102,10 @@ mkdir -p ${MODULE_PATH}/puppetmaster/{files,manifests}
 cat >> ${MODULE_PATH}/puppetmaster/manifests/init.pp <<EOF
 class puppetmaster {
  package {
+     'vim-enhanced': ensure => installed
+ }
+
+ package {
      'puppet-server': ensure => installed
  }
  
@@ -269,11 +273,12 @@ cat >> ${MODULE_PATH}/puppetmaster/files/puppet.conf << EOF
     # Stored configs
     storeconfigs = true
     thin_storeconfigs = true
+    dbadapter = mysql
     dbname = puppet
     dbuser = puppet
     dbpassword = ${PUPPET_MYSQL_PASSWD}
     dbserver = localhost
-    dbsocket = /var/run/mysqld/mysqld.sock
+#    dbsocket = /var/run/mysqld/mysqld.sock
 
 [production]
     # Production environment configuration
@@ -349,9 +354,11 @@ EOF
 ############
 $PUPPET apply --modulepath=${MODULE_PATH} -e "include puppetmaster" 
 
+# Cleanup
+rm -rf /root/{$EPEL_PACKAGE,$PUPPETLABS_PACKAGE,$PASSENGER_PACKAGE,puppet}
+
 # Set mysql root passwd
-/usr/bin/mysqladmin -u root password '${MYSQL_PASSWD}'
-#/usr/bin/mysqladmin -u root -h ${FULL_HOSTNAME} password '${MYSQL_PASSWD}'
+/usr/bin/mysqladmin -u root password ${MYSQL_PASSWD}
 
 # Create puppetdb
 mysql -u root --password=${MYSQL_PASSWD} -e "create database puppet; grant all privileges on puppet.* to puppet@localhost identified by '${PUPPET_MYSQL_PASSWD}';"
