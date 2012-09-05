@@ -38,8 +38,8 @@
 
 cat >> /root/boot-script.bash <<EOF
 apt-get -y update 1>/tmp/01.out 2>/tmp/01.err
-apt-get -y install nginx
-service start nginx
+apt-get -y install nginx 1>/tmp/02.out 2>/tmp/02.err
+service nginx start 1>/tmp/03.out 2>/tmp/03.err
 EOF
 
 /bin/bash /root/boot-script.bash &
