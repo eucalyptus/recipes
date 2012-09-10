@@ -39,13 +39,14 @@
 #
 # Credits:
 # Tom Ellis <tom.ellis@eucalyptus.com>
+# Greg DeKoenigsberg <greg.dekoenigsberg@eucalyptus.com>
 
 MYSQL_PASSWD="t3mp0rary"
 PUPPET_MYSQL_PASSWD="t3mppupp3t"
-FULL_HOSTNAME="puppet.example.com"
 SHORT_HOST=`echo ${FULL_HOSTNAME} | cut -d'.' -f1`
 YUM=`which yum`
 RPM=`which rpm`
+CURL=`which curl`
 EPEL_PACKAGE="epel-release-6-7.noarch.rpm"
 EPEL_URL="http://dl.fedoraproject.org/pub/epel/6/i386/"
 PUPPETLABS_PACKAGE="puppetlabs-release-6-1.noarch.rpm"
@@ -56,39 +57,42 @@ MODULE_PATH="/root/puppet/modules"
 
 ###########
 # Setup the hostname for the system. Puppet really relies on 
-# the hostname so this must be done.
+# the hostname so this must be done.  The most reliable way
+# is to pull it directly from the metadata service.
 ###########
+FULL_HOSTNAME=`${CURL} http://169.254.169.254/latest/meta-data/public-hostname`
 hostname ${FULL_HOSTNAME}
 
 sed -i -e "s/\(localhost.localdomain\)/${SHORT_HOST} ${FULL_HOSTNAME} \1/" /etc/hosts
-
 sed -i -e "s/HOSTNAME.*/HOSTNAME=${FULL_HOSTNAME}/g" /etc/sysconfig/network
 
 ###########
-# Download and install EPEL repo which contains lots of useful pacakges.
+# Download and install EPEL repo which contains lots of useful packages.
 ###########
 curl -o /root/${EPEL_PACKAGE} ${EPEL_URL}/${EPEL_PACKAGE}
-${RPM} -Uhv /root/${EPEL_PACKAGE}
+${RPM} -Uhv /root/${EPEL_PACKAGE} 1>/tmp/01.out 2>/tmp/01.err
 
 ###########
 # Download and install the puppetlabs repo which has new offical releases of puppet
 ###########
 # EPEL contains Puppet 2.6. There are some cool features in 2.7 though, ymmv.
-curl -o /root/${PUPPETLABS_PACKAGE} ${PUPPETLABS_URL}/${PUPPETLABS_PACKAGE} 
-${RPM} -Uhv /root/${PUPPETLABS_PACKAGE}
+curl -o /root/${PUPPETLABS_PACKAGE} ${PUPPETLABS_URL}/${PUPPETLABS_PACKAGE} 1>/tmp/02.out 2>/tmp/02.err
+${RPM} -Uhv /root/${PUPPETLABS_PACKAGE} 1>/tmp/03.out 2>/tmp/03.err
 
 ###########
 # Download and install the passenger repo to allow puppet to scale
 ###########
-# Passenger is not part of EPEL
-curl -o /root/${PASSENGER_PACKAGE} ${PASSENGER_URL}/${PASSENGER_PACKAGE}
-${RPM} -Uvh /root/${PASSENGER_PACKAGE}
+curl -o /root/${PASSENGER_PACKAGE} ${PASSENGER_URL}/${PASSENGER_PACKAGE} 1>/tmp/04.out 2>/tmp/04.err
+${RPM} -Uvh /root/${PASSENGER_PACKAGE} 1>/tmp/05.out 2>/tmp/05.err
+# Note that the Passenger repo doesn't like the values for $releasever that Amazon AMIs give, 
+# so we're going to cut those out and replace them with an explicit reference to Centos 6.
+sed -i -e "s/\$releasever/6/" /etc/yum.repos.d/passenger.repo 
 
 ###########
 # Update the instance and install the puppet agent
 ###########
-${YUM} -y update
-${YUM} -y install puppet
+${YUM} -y update 1>/tmp/06.out 2>/tmp/06.err
+${YUM} -y install puppet 1>/tmp/07.out 2>/tmp/07.err
 
 ##########
 # Configure puppet a puppetmaster using puppet
@@ -98,7 +102,7 @@ PUPPET=`which puppet`
 ##########
 # Setup the puppet manifest in /root/puppetmaster.pp
 ##########
-mkdir -p ${MODULE_PATH}/puppetmaster/{files,manifests}
+mkdir -p ${MODULE_PATH}/puppetmaster/{files,manifests} 1>/tmp/08.out 2>/tmp/08.err
 cat >> ${MODULE_PATH}/puppetmaster/manifests/init.pp <<EOF
 class puppetmaster {
  package {
@@ -352,21 +356,21 @@ EOF
 ############
 # Apply the puppet manifest
 ############
-$PUPPET apply --modulepath=${MODULE_PATH} -e "include puppetmaster" 
+$PUPPET apply --modulepath=${MODULE_PATH} -e "include puppetmaster" 1>/tmp/09.out 2>/tmp/09.err
 
 # Cleanup
-rm -rf /root/{$EPEL_PACKAGE,$PUPPETLABS_PACKAGE,$PASSENGER_PACKAGE,puppet}
+rm -rf /root/{$EPEL_PACKAGE,$PUPPETLABS_PACKAGE,$PASSENGER_PACKAGE,puppet} 1>/tmp/10.out 2>/tmp/10.err
 
 # Set mysql root passwd
-/usr/bin/mysqladmin -u root password ${MYSQL_PASSWD}
+/usr/bin/mysqladmin -u root password ${MYSQL_PASSWD} 1>/tmp/11.out 2>/tmp/11.err
 
 # Create puppetdb
-mysql -u root --password=${MYSQL_PASSWD} -e "create database puppet; grant all privileges on puppet.* to puppet@localhost identified by '${PUPPET_MYSQL_PASSWD}';"
+mysql -u root --password=${MYSQL_PASSWD} -e "create database puppet; grant all privileges on puppet.* to puppet@localhost identified by '${PUPPET_MYSQL_PASSWD}';" 1>/tmp/12.out 2>/tmp/12.err
 
 # We need to generate the puppet ssl certs before we can start apache 
 # perhaps there is a better way than doing this
-/sbin/service puppetmaster start
-/sbin/service puppetmaster stop
+/sbin/service puppetmaster start 1>/tmp/13.out 2>/tmp/13.err
+/sbin/service puppetmaster stop 1>/tmp/14.out 2>/tmp/14.err
 
 # Let's go!
-/sbin/service httpd start
+/sbin/service httpd start 1>/tmp/15.out 2>/tmp/15.err
