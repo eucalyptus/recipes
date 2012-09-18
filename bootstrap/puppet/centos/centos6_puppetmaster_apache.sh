@@ -43,7 +43,6 @@
 
 MYSQL_PASSWD="t3mp0rary"
 PUPPET_MYSQL_PASSWD="t3mppupp3t"
-SHORT_HOST=`echo ${FULL_HOSTNAME} | cut -d'.' -f1`
 YUM=`which yum`
 RPM=`which rpm`
 CURL=`which curl`
@@ -61,6 +60,7 @@ MODULE_PATH="/root/puppet/modules"
 # is to pull it directly from the metadata service.
 ###########
 FULL_HOSTNAME=`${CURL} http://169.254.169.254/latest/meta-data/public-hostname`
+SHORT_HOST=`echo ${FULL_HOSTNAME} | cut -d'.' -f1`
 hostname ${FULL_HOSTNAME}
 
 sed -i -e "s/\(localhost.localdomain\)/${SHORT_HOST} ${FULL_HOSTNAME} \1/" /etc/hosts
