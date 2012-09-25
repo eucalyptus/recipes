@@ -102,7 +102,6 @@ cd $(${PUPPET} --configprint confdir)/modules
 
 # Now install the cloud_provisioner module!
 puppet-module install puppetlabs/cloud_provisioner 1>/tmp/160.out 2>/tmp/160.err
-export RUBYLIB=$(pwd)/cloud_provisioner/lib:$RUBYLIB
 
 # After this, you still need to configure the system to actually provision some
 # cloud instances, which means setting up your EC2/Euca credentials.  To go on
@@ -111,4 +110,15 @@ export RUBYLIB=$(pwd)/cloud_provisioner/lib:$RUBYLIB
 # http://docs.puppetlabs.com/guides/cloud_pack_getting_started.html
 # http://forge.puppetlabs.com/puppetlabs/cloud_provisioner
 #
-# Happy clouding!
+# Here's what I did to get the client working:
+# 
+# export RUBYLIB=/etc/puppet/modules/cloud_provisioner/lib/:$RUBYLIB
+#   (to get the path working)
+# puppet help node_aws
+#   (to ensure that it installed correctly, should get useful help)
+# edit the .fog file to add key info
+#   (follow instructions at http://docs.puppetlabs.com/guides/cloud_pack_getting_started.html)
+# FIXME: more here
+# 
+# TODO:
+#   * Add this module to global ruby load path
