@@ -89,9 +89,10 @@ PUPPET=`which puppet`
 GEM=`which gem`
 
 # OK, with rubygems installed, install Fog, which is Ruby's cloud library.
-# We also need guid.
+# We also need guid and net-scp.
 ${GEM} install fog -v 0.7.2 1>/tmp/130.out 2>/tmp/130.err
 ${GEM} install guid 1>/tmp/140.out 2>/tmp/140.err
+${GEM} install net-scp 1>/tmp/145.out 2>/tmp/145.err
 
 # Now install puppet-module so we can install modules directly from
 # the Puppet module repository.
@@ -103,6 +104,11 @@ cd $(${PUPPET} --configprint confdir)/modules
 # Now install the cloud_provisioner module!
 puppet-module install puppetlabs/cloud_provisioner 1>/tmp/160.out 2>/tmp/160.err
 
+# OK, now set up Puppet to run in master mode.
+${PUPPET} master --mkusers --verbose
+
+
+
 # After this, you still need to configure the system to actually provision some
 # cloud instances, which means setting up your EC2/Euca credentials.  To go on
 # from here, check out:
@@ -110,7 +116,7 @@ puppet-module install puppetlabs/cloud_provisioner 1>/tmp/160.out 2>/tmp/160.err
 # http://docs.puppetlabs.com/guides/cloud_pack_getting_started.html
 # http://forge.puppetlabs.com/puppetlabs/cloud_provisioner
 #
-# Here's what I did to get the client working:
+# Subsequent steps to get working in AWS:
 # 
 # export RUBYLIB=/etc/puppet/modules/cloud_provisioner/lib/:$RUBYLIB
 #   (to get the path working)
@@ -118,7 +124,14 @@ puppet-module install puppetlabs/cloud_provisioner 1>/tmp/160.out 2>/tmp/160.err
 #   (to ensure that it installed correctly, should get useful help)
 # edit the .fog file to add key info
 #   (follow instructions at http://docs.puppetlabs.com/guides/cloud_pack_getting_started.html)
-# FIXME: more here
-# 
+# euca-authorize -p 8140 default
+#   (open port 8140 in the default group so puppet can talk)
+# cat "*" > /etc/puppet/autosign.conf
+#   (open the gates for autosigning!) (hmm, not working.)
+#   
+# puppet node_aws create --image ami-94cd60fd --keyname amazon-ssh --type m1.small
+#   (returned a running instance, hooah!)
+#   (note: this alami does NOT work for the bootstrapper itself)
 # TODO:
 #   * Add this module to global ruby load path
+#   * File a bug getting cloud provisioner to support ALAMI as a target
